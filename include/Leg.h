@@ -30,12 +30,13 @@ class Leg {
 
     unsigned long start_time[3];
     unsigned long progress_time[3];
-    unsigned long moving_time[3] = {600, 600, 600};
+    unsigned long moving_time[3] = {300, 300, 300};
     int target_angle[3];
     int previous_target_angle[3];
     int current_angle[3];
     int start_angle_offset[3];
     bool move_flag[3];
+    unsigned long straight_line_start_time;
     
 
     const static int idle_femur_offset = 50;
@@ -111,6 +112,7 @@ class Leg {
         this->move_flag[joint] = true;
     }
 
+    /* update a single joint on a leg */
     void update_leg_joint(Joints joint){
         this->progress_time[joint] = millis() - this->start_time[joint];
         if(this->progress_time[joint] <= this->moving_time[joint] && this->move_flag[joint]){
@@ -124,11 +126,6 @@ class Leg {
         }
     }
 
-    void update_leg(){
-        this->update_leg_joint(COXA);
-        this->update_leg_joint(FEMUR);
-        this->update_leg_joint(TIBIA);
-    }
 
     void set_leg_moving_time(unsigned long new_moving_time){
         this->moving_time[COXA] = new_moving_time;
@@ -136,7 +133,3 @@ class Leg {
         this->moving_time[TIBIA] = new_moving_time;
     }
 };
-
-/* define stance offset values*/
-// int Leg::idle_femur_offset = 50;
-// int Leg::idle_tibia_offset = 130;

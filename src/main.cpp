@@ -1,25 +1,16 @@
 #include <Arduino.h>
 #include "Hexapod.h"
 
-/* forward declarations */
-void center_all_legs();
-void move_all_femur(int angle);
-void move_all_tibia(int angle);
-void idle_all_legs();
-void flower_all_legs();
+// forward declaration
 bool parse_input();
-void power_stance();
-void swing_stance();
+
 
 Hexapod hexapod{};
-
 
 int input[3];
 int range[3][2] = {{-30, 30},     // coxa
                    {-60, 60},     // femur
                    {-140, 140}};  // tibia
-
-
 
 void setup() {
     Serial.begin(115200);
@@ -27,55 +18,45 @@ void setup() {
 
     hexapod.set_calibration();
 
-    /*
-    R1.center_joint(COXA);
-    R2.center_joint(COXA);
-    R3.center_joint(COXA);
-
-    L1.center_joint(COXA);
-    L2.center_joint(COXA);
-    L3.center_joint(COXA);
-    */
-
-    // idle_all_legs();
-    /*
-    center_all_legs();
-    Serial.println("Centered legs");
-    delay(5000);
-    flower_all_legs();
-    Serial.println("flowered legs");
-    delay(500);
-    idle_all_legs();
-    Serial.println("idle legs");
-    delay(100);*/
-    //power_stance();
 }
 
-bool flag = true;
-unsigned long previous_temp = millis();
-unsigned long midpoint_previous = millis();
+
+// test vars
+bool flag[4] = {true, true, true, true};
+unsigned long starttime = millis();
+int timet = 1200;
+
 
 void loop() {
+
+    // test cycle
+    unsigned long progress = millis() - starttime;
     
-    
-    //L3.update_leg();
-    
-    unsigned long elapsed_temp = millis() - previous_temp;
-    unsigned long midpoint_elapsed_temp = millis() - midpoint_previous;
-    //check if full cycle is complete
-    if(elapsed_temp > 1200){
-        previous_temp = millis();
-        if(flag){
-            swing_stance();
-            flag = false;
-        }else{
-            power_stance();
-            flag = true;
-        }
-    }else{
-        //full 
+    if((int) progress > timet * 0.5 && flag[0]){
+        hexapod.power_stance();
+        flag[0] = false;
+        Serial.println("pwer stance");
+        Serial.printf("time: %u\n", progress);
+    }else if((int) progress > timet && flag[1]){
+        hexapod.power_middle();
+        flag[1] = false;
+        Serial.println("pwer middle");
+        Serial.printf("time: %u\n", progress);
+    }else if((int) progress > timet * 1.5 && flag[2]){
+        hexapod.swing_stance();
+        flag[2] = false;
+        Serial.println("swing stance");
+        Serial.printf("time: %u\n", progress);
+    }else if((int) progress > timet * 2 && flag[3]){
+        hexapod.swing_middle();
+        flag[3] = false;
+        Serial.println("swing middle");
+        Serial.printf("time: %u\n", progress);
     }
+
     
+    hexapod.update_leg(LEFT3);
+
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
@@ -89,6 +70,7 @@ void loop() {
             //L3.move_to_angle(COXA, input[0]);
             //L3.move_to_angle(FEMUR, input[1]);
             //L3.move_to_angle(TIBIA, input[2]);
+            hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
         }
 
         Serial.clear();
@@ -99,39 +81,7 @@ void loop() {
     }
 }
 
-void move_leg(){
-    // assume hexapod is idle
 
-
-}
-
-void swing_stroke(){
-    // move to swing stance
-
-    // move to swing middle
-
-    // move to power stance
-}
-
-void power_stroke(){
-    // move to power stance
-
-    // move to power middle
-
-    // move to swing stance
-}
-
-void swing_stance(){
-    //L3.move_to_angle(COXA, -20);
-    //L3.move_to_angle(FEMUR, 10);
-    //L3.move_to_angle(TIBIA, 65);
-}
-
-void power_stance(){
-    //L3.move_to_angle(COXA, 25);
-    //L3.move_to_angle(FEMUR, 45);
-    //L3.move_to_angle(TIBIA, 135);
-}
 
 bool parse_input() {
     for (int i = 0; i < 3; i++) {
