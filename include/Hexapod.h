@@ -30,104 +30,19 @@ class Hexapod {
         R3.set_center(90, 96, 145);
     }
 
-    
-
-    void straight_line_cycle(unsigned long duration) {
+    void update(int speed, bool is_turn){
         /*
-        Leg &leg3 = get_leg(LEFT3);
-        unsigned long leg_progress_time =
-            millis() - leg3.straight_line_start_time;
-        Serial.println((String) "leg progress: " + leg_progress_time +
-                       ", start: " + leg3.straight_line_start_time);
-
-        // set new movement target proportional to duration 
-        if (leg_progress_time >= 0 && leg_progress_time < (duration * 0.25) && flag[0]) {
-            // power stance
-            // wait 1/4 duration
-            power_stance();
-            Serial.println("power stance");
-            flag[0] = false;
-
-        } else if (leg_progress_time >= (duration * 0.25) &&
-                   leg_progress_time < (duration * 0.50) && flag[1]) {
-            // power middle
-            // wait 1/4 duration
-            power_middle();
-            Serial.println("power middle");
-            flag[1] = false;
-
-        } else if (leg_progress_time >= (duration * 0.50) &&
-                   leg_progress_time < (duration * 0.75) && flag[2]) {
-            // swing stance
-            // wait 1/4 duration
-            swing_stance();
-            Serial.println("swing stance");
-            flag[2] = false;
-
-        } else if (leg_progress_time >= (duration * 0.75) &&
-                   leg_progress_time < duration && flag[3]) {
-            // swing middle
-            // wait 1/4 duration
-            swing_middle();
-            Serial.println("swing middle");
-            flag[3] = false;
-
-        } else {
-            // need to re-cycle
-            Serial.println("Need to re-cycle...");
-            delay(10000);
-        }
-
-        update_leg(LEFT3);
-
-
-        // leg3.straight_line_start_time = millis();
         
-        */        
+        time = speed * x
 
+        if not turn:
+            // move straight
+
+            leg.leg_cycle_straight(time) // re-calculate the map, call servo write
+
+        */
     }
 
-    void power_stance() {
-        // L3.move_to_angle(COXA, 25);
-        // L3.move_to_angle(FEMUR, 45);
-        // L3.move_to_angle(TIBIA, 135);
-        move_leg_to_angle(LEFT3, 25, 45, 135);
-    }
-
-    void power_middle() { move_leg_to_angle(LEFT3, -2, 40, 110); }
-
-    void swing_stance() {
-        // L3.move_to_angle(COXA, -20);
-        // L3.move_to_angle(FEMUR, 10);
-        // L3.move_to_angle(TIBIA, 65);
-        move_leg_to_angle(LEFT3, -20, 10, 65);
-    }
-
-    void swing_middle() { move_leg_to_angle(LEFT3, 15, 60, 100); }
-
-    void move_now(Legs const legs, int coxa_angle, int femur_angle, int tibia_angle){
-        Leg &leg = get_leg(legs);
-        leg.move_from_center(COXA, coxa_angle);
-        leg.move_from_center(FEMUR, femur_angle);
-        leg.move_from_center(TIBIA, tibia_angle);
-    }
-
-    void move_leg_to_angle(Legs const legs, int coxa_angle, int femur_angle,
-                           int tibia_angle) {
-        Leg &leg = get_leg(legs);
-        leg.move_to_angle(TIBIA, tibia_angle);
-        leg.move_to_angle(FEMUR, femur_angle);
-        leg.move_to_angle(COXA, coxa_angle);
-    }
-
-    /* update a single leg, to be called every loop */
-    void update_leg(Legs const legs) {
-        Leg &leg = get_leg(legs);
-
-        leg.update_leg_joint(COXA);
-        leg.update_leg_joint(FEMUR);
-        leg.update_leg_joint(TIBIA);
-    }
 
     void idle_legs() {
         R1.idle_leg();
@@ -223,6 +138,7 @@ class Hexapod {
         L3.center_leg();
     }
 
+    /*
     Leg &get_leg(Legs const legs) {
         switch (legs) {
             case LEFT1:
@@ -242,4 +158,5 @@ class Hexapod {
                 return this->L3;
         }
     }
+    */
 };

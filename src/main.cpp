@@ -18,6 +18,13 @@ void setup() {
 
     hexapod.set_calibration();
 
+    /*
+    
+    // set the initial target angles for each leg
+    hexapod.initialize_tripod(); 
+
+    */
+
 }
 
 
@@ -29,7 +36,18 @@ int timet = 1200;
 
 void loop() {
 
+    /*
+    
+    speed = get controller input
+    
+    hexapod.update(speed, direction)
+
+    */
+
+    hexapod.update(1200, false);
+
     // test cycle
+    /*
     unsigned long progress = millis() - starttime;
     
     if((int) progress > timet * 0.5 && flag[0]){
@@ -54,9 +72,8 @@ void loop() {
         Serial.printf("time: %u\n", progress);
     }
 
-    
     hexapod.update_leg(LEFT3);
-
+    */
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
@@ -70,7 +87,7 @@ void loop() {
             //L3.move_to_angle(COXA, input[0]);
             //L3.move_to_angle(FEMUR, input[1]);
             //L3.move_to_angle(TIBIA, input[2]);
-            hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
+            //hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
         }
 
         Serial.clear();
