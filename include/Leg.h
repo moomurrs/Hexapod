@@ -2,7 +2,8 @@
 
 enum Joint { COXA, FEMUR, TIBIA } typedef Joints;
 enum Direction { LEFT, RIGHT } typedef Side;
-
+enum Stances { POWER, POWER_MIDDLE, SWING, SWING_MIDDLE } typedef Stance;
+int current_time = 1200;
 class Leg {
    private:
     /* 3 servos per leg */
@@ -24,15 +25,19 @@ class Leg {
         switch (joint) {
             case COXA:
                 this->coxa.write(angle);
+                this->current_angle_offset[COXA] = angle;
                 break;
             case FEMUR:
                 this->femur.write(angle);
+                this->current_angle_offset[FEMUR] = angle;
                 break;
             case TIBIA:
                 this->tibia.write(angle);
+                this->current_angle_offset[TIBIA] = angle;
                 break;
         }
     }
+
 
    public:
     /* Constructor*/
@@ -48,10 +53,10 @@ class Leg {
     unsigned long moving_time[3] = {300, 300, 300};
     int target_angle[3];
     int previous_target_angle[3];
-    int current_angle[3];
+    int current_angle_offset[3];
     int start_angle_offset[3];
     bool move_flag[3];
-    unsigned long straight_line_start_time;
+    Stance current_stance;
 
     const static int idle_femur_offset = 50;
     const static int idle_tibia_offset = 130;
@@ -80,7 +85,6 @@ class Leg {
         return value;
     }
 
-    
     // move a joint with respect from its center
     void move_from_center(Joints joint, int angle) {
         this->_move_joint(joint, this->get_center(joint) - angle);
@@ -112,7 +116,40 @@ class Leg {
         this->move_flag[joint] = true;
     }
 
-    void leg_cycle_straight(int time) {
+    void set_initial_stance(Stance stance) {
+        // current stance = stance
+    }
+
+    void leg_cycle_straight(int new_time) {
+        if (current_time == new_time) {
+            // change speed of cycle
+            this->set_new_speeds(new_time);
+        } else {
+            // continue cycle
+
+            /*
+
+            if progress_time < moving_time && stance is power:
+                leg.power_stance()
+            else if progress_time < moving_time && stance is power_middle:
+                leg.power_middle()
+            else if progress_time < moving_time && stance is swing:
+                leg.swing_stance()
+            else if progress_time < moving_time && stance is swing_middle:
+                leg.swing_middle()
+            else
+                // progress time expired, move to next stance
+                current_stance += 1 % 4 
+
+                // restart movement timings
+                progress_time = 0       
+                start_time = 0
+
+            leg.update // move the leg towards the target
+
+            */
+        }
+
         /*
 
         // modify the start/progress times & old/new angles to re-calculates map
@@ -122,6 +159,26 @@ class Leg {
         this->update_
 
         */
+    }
+
+    // speeds up or slows down movement
+    void set_new_speeds(int time) {
+        float interval = (float)time / 4.0;
+
+        // change time to reach target
+        this->moving_time[COXA] = interval;
+        this->moving_time[FEMUR] = interval;
+        this->moving_time[TIBIA] = interval;
+
+        // save current progress
+        this->start_angle_offset[COXA] = this->current_angle_offset[COXA];
+        this->start_angle_offset[FEMUR] = this->current_angle_offset[FEMUR];
+        this->start_angle_offset[TIBIA] = this->current_angle_offset[TIBIA];
+
+        // restart timer
+        this->start_time[COXA] = 0;
+        this->start_time[FEMUR] = 0;
+        this->start_time[TIBIA] = 0;
     }
 
     /* update a single leg, to be called every loop */
@@ -151,25 +208,33 @@ class Leg {
         }
     }
 
-    void leg_straight_cycle(unsigned long time, bool is_forward) {}
 
     void power_stance() {
         // L3.move_to_angle(COXA, 25);
         // L3.move_to_angle(FEMUR, 45);
         // L3.move_to_angle(TIBIA, 135);
-        move_leg_to_angle(25, 45, 135);
+
+        //move_leg_to_angle(25, 45, 135);
+        set_new_targets(25, 45, 135);
     }
 
-    void power_middle() { move_leg_to_angle(-2, 40, 110); }
+    void power_middle() {  
+        //move_leg_to_angle(-2, 40, 110);
+        set_new_targets(-2, 40, 110);
+    }
 
     void swing_stance() {
         // L3.move_to_angle(COXA, -20);
         // L3.move_to_angle(FEMUR, 10);
         // L3.move_to_angle(TIBIA, 65);
-        move_leg_to_angle(-20, 10, 65);
+        // move_leg_to_angle(-20, 10, 65);
+        set_new_targets(-20, 10, 65);
     }
 
-    void swing_middle() { move_leg_to_angle(15, 60, 100); }
+    void swing_middle() { 
+        // move_leg_to_angle(15, 60, 100); 
+        set_new_targets(15, 60, 100); 
+    }
 
     void move_leg_to_angle(int coxa_angle, int femur_angle, int tibia_angle) {
         this->move_to_angle(TIBIA, tibia_angle);
@@ -177,10 +242,11 @@ class Leg {
         this->move_to_angle(COXA, coxa_angle);
     }
 
-    /*
-    void set_leg_moving_time(unsigned long new_moving_time) {
-        this->moving_time[COXA] = new_moving_time;
-        this->moving_time[FEMUR] = new_moving_time;
-        this->moving_time[TIBIA] = new_moving_time;
-    }*/
+    void set_new_targets(int coxa_angle, int femur_angle, int tibia_angle){
+        this->target_angle[COXA] = coxa_angle;
+        this->target_angle[FEMUR] = femur_angle;
+        this->target_angle[TIBIA] = tibia_angle;
+    }
+
 };
+

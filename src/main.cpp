@@ -18,12 +18,9 @@ void setup() {
 
     hexapod.set_calibration();
 
-    /*
     
     // set the initial target angles for each leg
     hexapod.initialize_tripod(); 
-
-    */
 
 }
 

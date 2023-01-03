@@ -30,6 +30,10 @@ class Hexapod {
         R3.set_center(90, 96, 145);
     }
 
+    void initialize_tripod(){
+        L3.set_initial_stance(POWER);
+    }
+
     void update(int speed, bool is_turn){
         /*
         
