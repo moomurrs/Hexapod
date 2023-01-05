@@ -49,6 +49,11 @@ class Hexapod {
         }*/
 
         L3.leg_cycle_straight(time);
+
+    }
+
+    void manual_move(int coxa_angle, int femur_angle, int tibit_angle){
+        R3.move_leg_from_center(coxa_angle, femur_angle, tibit_angle);
     }
 
 

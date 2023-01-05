@@ -83,9 +83,15 @@ class Leg {
 
     // move a joint with respect from its center, update previous and current
     // angle offsets
-    void move_from_center(Joints joint, int angle) {
+    void move_joint_from_center(Joints joint, int angle) {
         this->current_angle_offset[joint] = angle;
         this->_move_joint(joint, this->get_center(joint) - angle);
+    }
+
+    void move_leg_from_center(int coxa_angle, int femur_angle, int tibia_angle){
+        move_joint_from_center(COXA, coxa_angle);
+        move_joint_from_center(FEMUR, femur_angle);
+        move_joint_from_center(TIBIA, tibia_angle);
     }
 
     // point out all the joints out in a straight line in a leg
@@ -178,7 +184,7 @@ class Leg {
         long new_angle =
             map(this->progress_time[joint], 0, this->moving_time[joint],
                 this->previous_target_angle[joint], this->target_angle[joint]);
-        this->move_from_center(joint, new_angle);
+        this->move_joint_from_center(joint, new_angle);
     }
 
     // speeds up or slows down movement

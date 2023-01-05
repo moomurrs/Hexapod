@@ -22,7 +22,7 @@ void setup() {
 
     
     // set the initial target angles for each leg
-    hexapod.initialize(); 
+    //hexapod.initialize(); 
 
 
 }
@@ -37,18 +37,16 @@ void loop() {
     hexapod.update(speed, direction)
     */
 
-   
+    /*
     if(continue_loop){
-        hexapod.update(speed_input, false);
-    }
+        //hexapod.update(speed_input, false);
+    }*/
     
-
-
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
 
-        /*
+        
         if (parse_three_input()) {
             Serial.println("\n\nInput received \n");
             Serial.println((String) "coxa: " + input[0]);
@@ -56,15 +54,17 @@ void loop() {
             Serial.println((String) "tibia: " + input[2]);
 
             //hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
-        }*/
+            hexapod.manual_move(input[0], input[1], input[2]);
+        }
 
+        /*
         int serial_input = Serial.parseInt();
         Serial.printf("Input: %d\n", serial_input);
         if(serial_input == 0){
             continue_loop = false;
         }else{
             speed_input = serial_input;
-        }
+        }*/
 
         Serial.clear();
         delay(20);
