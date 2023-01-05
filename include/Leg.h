@@ -52,6 +52,7 @@ class Leg {
     int current_angle_offset[3];
     int start_angle_offset[3];
     Stance current_stance;
+    int current_leg_cycle_time = 2000;
 
     const static int idle_femur_offset = 50;
     const static int idle_tibia_offset = 130;
@@ -119,8 +120,10 @@ class Leg {
 
     void leg_cycle_straight(int new_time) {
         // set new targets and previous targets
-        if (progress_time[TIBIA] >= moving_time[TIBIA]) {
-            Serial.printf("Changing stance: %d", this->current_stance);
+        if(new_time != current_leg_cycle_time){
+            set_new_speeds(new_time);
+        }else if (progress_time[TIBIA] >= moving_time[TIBIA]) {
+            //Serial.printf("Changing stance: %d", this->current_stance);
 
             // progress time expired, move to next stance
             this->current_stance =
@@ -153,8 +156,8 @@ class Leg {
 
         // keep moving towards target
         this->interpolate_movement(TIBIA);
-        //this->interpolate_movement(FEMUR);
-        //this->interpolate_movement(COXA);
+        this->interpolate_movement(FEMUR);
+        this->interpolate_movement(COXA);
     }
 
     void initialize_leg() {
@@ -187,10 +190,20 @@ class Leg {
         this->moving_time[FEMUR] = interval;
         this->moving_time[TIBIA] = interval;
 
+        this->progress_time[COXA] = 0;
+        this->progress_time[FEMUR] = 0;
+        this->progress_time[TIBIA] = 0;
+
         // save current progress
         this->start_angle_offset[COXA] = this->current_angle_offset[COXA];
         this->start_angle_offset[FEMUR] = this->current_angle_offset[FEMUR];
         this->start_angle_offset[TIBIA] = this->current_angle_offset[TIBIA];
+
+        this->previous_target_angle[COXA] = this->current_angle_offset[COXA];
+        this->previous_target_angle[FEMUR] = this->current_angle_offset[FEMUR];
+        this->previous_target_angle[TIBIA] = this->current_angle_offset[TIBIA];
+
+        current_leg_cycle_time = time;
 
         // restart timer
         // this->start_time = 0;

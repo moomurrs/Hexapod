@@ -2,7 +2,7 @@
 #include "Hexapod.h"
 
 // forward declaration
-bool parse_input();
+bool parse_three_input();
 
 
 Hexapod hexapod{};
@@ -27,7 +27,8 @@ void setup() {
 
 }
 
-bool kill = false;
+int speed_input = 2000;
+bool continue_loop = true;
 
 void loop() {
 
@@ -36,25 +37,33 @@ void loop() {
     hexapod.update(speed, direction)
     */
 
-    if(!kill){
-        hexapod.update(2000, false);
+   
+    if(continue_loop){
+        hexapod.update(speed_input, false);
     }
+    
+
 
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
 
-        if (parse_input()) {
+        /*
+        if (parse_three_input()) {
             Serial.println("\n\nInput received \n");
             Serial.println((String) "coxa: " + input[0]);
             Serial.println((String) "femur: " + input[1]);
             Serial.println((String) "tibia: " + input[2]);
 
-            //L3.move_to_angle(COXA, input[0]);
-            //L3.move_to_angle(FEMUR, input[1]);
-            //L3.move_to_angle(TIBIA, input[2]);
             //hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
-            kill = input[0];
+        }*/
+
+        int serial_input = Serial.parseInt();
+        Serial.printf("Input: %d\n", serial_input);
+        if(serial_input == 0){
+            continue_loop = false;
+        }else{
+            speed_input = serial_input;
         }
 
         Serial.clear();
@@ -67,7 +76,7 @@ void loop() {
 
 
 
-bool parse_input() {
+bool parse_three_input() {
     for (int i = 0; i < 3; i++) {
         input[i] = atoi(Serial.readStringUntil(',').c_str());
         // Serial.println((String) "Echo: " + input);
