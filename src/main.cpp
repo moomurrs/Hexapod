@@ -12,6 +12,8 @@ int range[3][2] = {{-30, 30},     // coxa
                    {-60, 60},     // femur
                    {-140, 140}};  // tibia
 
+enum Tests{Herp, Derp} typedef Test;
+
 void setup() {
     Serial.begin(115200);
     Serial.setTimeout(100);
@@ -20,57 +22,24 @@ void setup() {
 
     
     // set the initial target angles for each leg
-    hexapod.initialize_tripod(); 
+    hexapod.initialize(); 
+
 
 }
 
-
-// test vars
-bool flag[4] = {true, true, true, true};
-unsigned long starttime = millis();
-int timet = 1200;
-
+bool kill = false;
 
 void loop() {
 
     /*
-    
     speed = get controller input
-    
     hexapod.update(speed, direction)
-
     */
 
-    hexapod.update(1200, false);
-
-    // test cycle
-    /*
-    unsigned long progress = millis() - starttime;
-    
-    if((int) progress > timet * 0.5 && flag[0]){
-        hexapod.power_stance();
-        flag[0] = false;
-        Serial.println("pwer stance");
-        Serial.printf("time: %u\n", progress);
-    }else if((int) progress > timet && flag[1]){
-        hexapod.power_middle();
-        flag[1] = false;
-        Serial.println("pwer middle");
-        Serial.printf("time: %u\n", progress);
-    }else if((int) progress > timet * 1.5 && flag[2]){
-        hexapod.swing_stance();
-        flag[2] = false;
-        Serial.println("swing stance");
-        Serial.printf("time: %u\n", progress);
-    }else if((int) progress > timet * 2 && flag[3]){
-        hexapod.swing_middle();
-        flag[3] = false;
-        Serial.println("swing middle");
-        Serial.printf("time: %u\n", progress);
+    if(!kill){
+        hexapod.update(2000, false);
     }
 
-    hexapod.update_leg(LEFT3);
-    */
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
@@ -85,6 +54,7 @@ void loop() {
             //L3.move_to_angle(FEMUR, input[1]);
             //L3.move_to_angle(TIBIA, input[2]);
             //hexapod.move_leg_to_angle(LEFT3, input[0], input[1], input[2]);
+            kill = input[0];
         }
 
         Serial.clear();

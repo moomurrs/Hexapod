@@ -30,24 +30,29 @@ class Hexapod {
         R3.set_center(90, 96, 145);
     }
 
-    void initialize_tripod(){
+    void initialize(){
         L3.set_initial_stance(POWER);
+        L3.initialize_leg();
     }
 
-    void update(int speed, bool is_turn){
+
+    
+    void update(int time, bool is_turn){
         /*
-        
-        time = speed * x
+        if (current_time == new_time) {
+            // change speed of cycle
+            //this->set_new_speeds(new_time);
+        } else {
+            // continue cycle
 
-        if not turn:
-            // move straight
+            
+        }*/
 
-            leg.leg_cycle_straight(time) // re-calculate the map, call servo write
-
-        */
+        L3.leg_cycle_straight(time);
     }
 
 
+    /*
     void idle_legs() {
         R1.idle_leg();
         R2.idle_leg();
@@ -76,7 +81,7 @@ class Hexapod {
         }
     }
 
-    /* move all femurs to the same angle */
+    // move all femurs to the same angle
     void move_all_femur(int angle) {
         R1.move_to_angle(FEMUR, angle);
         R2.move_to_angle(FEMUR, angle);
@@ -87,7 +92,7 @@ class Hexapod {
         L3.move_to_angle(FEMUR, angle);
     }
 
-    /* move all tibia to the same angle */
+    // move all tibia to the same angle 
     void move_all_tibia(int angle) {
         R1.move_to_angle(TIBIA, angle);
         R2.move_to_angle(TIBIA, angle);
@@ -129,7 +134,7 @@ class Hexapod {
             L2.update_leg_joint(TIBIA);
             L3.update_leg_joint(TIBIA);
         }
-    }
+    }*/
 
     /* spread the joints of all legs out like a starfish */
     void center_all_legs() {
