@@ -34,13 +34,40 @@ class Hexapod {
     void initialize(){
         
         
+        L1.set_initial_stance(POWER);
+        L1.initialize_leg_timer();
+        L1.initialize_stance_points(POWER, 25, 10, 65);
+        L1.initialize_stance_points(POWER_MIDDLE, 15, 40, 110);
+        L1.initialize_stance_points(SWING, -20, 45, 135);
+        L1.initialize_stance_points(SWING_MIDDLE, -2, 60, 100);
+
+        L2.set_initial_stance(POWER);
+        L2.initialize_leg_timer();
+        L2.initialize_stance_points(POWER, 23, 43, 120);
+        L2.initialize_stance_points(POWER_MIDDLE, 0, 43, 120);
+        L2.initialize_stance_points(SWING, -23, 43, 120);
+        L2.initialize_stance_points(SWING_MIDDLE, 0, 50, 100);
+
         L3.set_initial_stance(POWER);
         L3.initialize_leg_timer();
         L3.initialize_stance_points(POWER, 25, 45, 135);
         L3.initialize_stance_points(POWER_MIDDLE, -2, 40, 110);
         L3.initialize_stance_points(SWING, -20, 10, 65);
         L3.initialize_stance_points(SWING_MIDDLE, 15, 60, 100);
-        
+
+        R1.set_initial_stance(POWER);
+        R1.initialize_leg_timer();
+        R1.initialize_stance_points(POWER, -25, 10, 65);
+        R1.initialize_stance_points(POWER_MIDDLE, -15, 40, 110);
+        R1.initialize_stance_points(SWING, 20, 45, 135);
+        R1.initialize_stance_points(SWING_MIDDLE, 2, 60, 100);
+
+        R2.set_initial_stance(POWER);
+        R2.initialize_leg_timer();
+        R2.initialize_stance_points(POWER, -23, 43, 120);
+        R2.initialize_stance_points(POWER_MIDDLE, 0, 43, 120);
+        R2.initialize_stance_points(SWING, 23, 43, 120);
+        R2.initialize_stance_points(SWING_MIDDLE, 0, 50, 100);
 
         
         R3.set_initial_stance(SWING);
@@ -48,7 +75,7 @@ class Hexapod {
         R3.initialize_stance_points(POWER, -25, 45, 135);
         R3.initialize_stance_points(POWER_MIDDLE, 2, 40, 110);
         R3.initialize_stance_points(SWING, 20, 10, 65);
-        R3.initialize_stance_points(SWING_MIDDLE, -15, 60, 100);
+        R3.initialize_stance_points(SWING_MIDDLE, -15, 60, 100);        
         
     }
 
@@ -65,99 +92,18 @@ class Hexapod {
             
         }*/
 
-        L3.leg_cycle_straight(time);
-        R3.leg_cycle_straight(time);
+        //L1.leg_cycle_straight(time);
+        R2.leg_cycle_straight(time);
+        //L3.leg_cycle_straight(time);
+        //R1.leg_cycle_straight(time);
+        //R3.leg_cycle_straight(time);
 
     }
 
     void manual_move(int coxa_angle, int femur_angle, int tibia_angle){
-        R3.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
+        //L2.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
     }
 
-
-    /*
-    void idle_legs() {
-        R1.idle_leg();
-        R2.idle_leg();
-        R3.idle_leg();
-
-        L1.idle_leg();
-        L2.idle_leg();
-        L3.idle_leg();
-
-        while (L3.move_flag) {
-            R1.update_leg_joint(FEMUR);
-            R2.update_leg_joint(FEMUR);
-            R3.update_leg_joint(FEMUR);
-
-            R1.update_leg_joint(TIBIA);
-            R2.update_leg_joint(TIBIA);
-            R3.update_leg_joint(TIBIA);
-
-            L1.update_leg_joint(FEMUR);
-            L2.update_leg_joint(FEMUR);
-            L3.update_leg_joint(FEMUR);
-
-            L1.update_leg_joint(TIBIA);
-            L2.update_leg_joint(TIBIA);
-            L3.update_leg_joint(TIBIA);
-        }
-    }
-
-    // move all femurs to the same angle
-    void move_all_femur(int angle) {
-        R1.move_to_angle(FEMUR, angle);
-        R2.move_to_angle(FEMUR, angle);
-        R3.move_to_angle(FEMUR, angle);
-
-        L1.move_to_angle(FEMUR, angle);
-        L2.move_to_angle(FEMUR, angle);
-        L3.move_to_angle(FEMUR, angle);
-    }
-
-    // move all tibia to the same angle 
-    void move_all_tibia(int angle) {
-        R1.move_to_angle(TIBIA, angle);
-        R2.move_to_angle(TIBIA, angle);
-        R3.move_to_angle(TIBIA, angle);
-
-        L1.move_to_angle(TIBIA, angle);
-        L2.move_to_angle(TIBIA, angle);
-        L3.move_to_angle(TIBIA, angle);
-    }
-
-    void flower_legs() {
-        int femur_angle = 40;
-        int tibia_angle = -20;
-        R1.center_joint(COXA);
-        R2.center_joint(COXA);
-        R3.center_joint(COXA);
-
-        L1.center_joint(COXA);
-        L2.center_joint(COXA);
-        L3.center_joint(COXA);
-
-        move_all_femur(femur_angle);
-        move_all_tibia(tibia_angle);
-
-        while (L3.move_flag[TIBIA]) {
-            R1.update_leg_joint(FEMUR);
-            R2.update_leg_joint(FEMUR);
-            R3.update_leg_joint(FEMUR);
-
-            R1.update_leg_joint(TIBIA);
-            R2.update_leg_joint(TIBIA);
-            R3.update_leg_joint(TIBIA);
-
-            L1.update_leg_joint(FEMUR);
-            L2.update_leg_joint(FEMUR);
-            L3.update_leg_joint(FEMUR);
-
-            L1.update_leg_joint(TIBIA);
-            L2.update_leg_joint(TIBIA);
-            L3.update_leg_joint(TIBIA);
-        }
-    }*/
 
     /* spread the joints of all legs out like a starfish */
     void center_all_legs() {
@@ -170,25 +116,4 @@ class Hexapod {
         L3.center_leg();
     }
 
-    /*
-    Leg &get_leg(Legs const legs) {
-        switch (legs) {
-            case LEFT1:
-                return this->L1;
-            case LEFT2:
-                return this->L2;
-            case LEFT3:
-                return this->L3;
-            case RIGHT1:
-                return this->R1;
-            case RIGHT2:
-                return this->R2;
-            case RIGHT3:
-                return this->R3;
-            default:
-                Serial.println("Error: default reached");
-                return this->L3;
-        }
-    }
-    */
 };
