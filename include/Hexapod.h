@@ -9,13 +9,13 @@ enum Legs { LEFT1, LEFT2, LEFT3, RIGHT1, RIGHT2, RIGHT3 } typedef Legs;
 
 class Hexapod {
    private:
-    Leg L1{36, 23, 22, LEFT};
-    Leg L2{37, 33, 29, LEFT};
-    Leg L3{8, 25, 28, LEFT};
+    Leg L1{36, 23, 22};
+    Leg L2{37, 33, 29};
+    Leg L3{8, 25, 28};
 
-    Leg R1{5, 2, 3, RIGHT};
-    Leg R2{4, 7, 6, RIGHT};
-    Leg R3{9, 10, 24, RIGHT};
+    Leg R1{5, 2, 3};
+    Leg R2{4, 7, 6};
+    Leg R3{9, 10, 24};
 
    public:
     /* calibrate servo center angles */
@@ -27,12 +27,29 @@ class Hexapod {
 
         R1.set_center(80, 93, 150);
         R2.set_center(98, 102, 156);
-        R3.set_center(90, 96, 145);
+        R3.set_center(90, 93, 145);
     }
 
+
     void initialize(){
+        
+        
         L3.set_initial_stance(POWER);
-        L3.initialize_leg();
+        L3.initialize_leg_timer();
+        L3.initialize_stance_points(POWER, 25, 45, 135);
+        L3.initialize_stance_points(POWER_MIDDLE, -2, 40, 110);
+        L3.initialize_stance_points(SWING, -20, 10, 65);
+        L3.initialize_stance_points(SWING_MIDDLE, 15, 60, 100);
+        
+
+        
+        R3.set_initial_stance(SWING);
+        R3.initialize_leg_timer();
+        R3.initialize_stance_points(POWER, -25, 45, 135);
+        R3.initialize_stance_points(POWER_MIDDLE, 2, 40, 110);
+        R3.initialize_stance_points(SWING, 20, 10, 65);
+        R3.initialize_stance_points(SWING_MIDDLE, -15, 60, 100);
+        
     }
 
 
@@ -49,11 +66,12 @@ class Hexapod {
         }*/
 
         L3.leg_cycle_straight(time);
+        R3.leg_cycle_straight(time);
 
     }
 
-    void manual_move(int coxa_angle, int femur_angle, int tibit_angle){
-        R3.move_leg_from_center(coxa_angle, femur_angle, tibit_angle);
+    void manual_move(int coxa_angle, int femur_angle, int tibia_angle){
+        R3.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
     }
 
 
