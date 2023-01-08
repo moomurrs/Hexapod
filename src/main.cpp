@@ -27,7 +27,7 @@ void setup() {
 
 }
 
-int speed_input = 3000;
+int speed_input = 1200;
 bool continue_loop = true;
 
 void loop() {

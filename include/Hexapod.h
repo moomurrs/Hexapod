@@ -41,7 +41,7 @@ class Hexapod {
         L1.initialize_stance_points(SWING, -20, 45, 135);
         L1.initialize_stance_points(SWING_MIDDLE, -2, 60, 100);
 
-        L2.set_initial_stance(POWER);
+        L2.set_initial_stance(SWING);
         L2.initialize_leg_timer();
         L2.initialize_stance_points(POWER, 23, 43, 120);
         L2.initialize_stance_points(POWER_MIDDLE, 0, 43, 120);
@@ -55,7 +55,7 @@ class Hexapod {
         L3.initialize_stance_points(SWING, -20, 10, 65);
         L3.initialize_stance_points(SWING_MIDDLE, 15, 60, 100);
 
-        R1.set_initial_stance(POWER);
+        R1.set_initial_stance(SWING);
         R1.initialize_leg_timer();
         R1.initialize_stance_points(POWER, -25, 10, 65);
         R1.initialize_stance_points(POWER_MIDDLE, -15, 40, 110);
@@ -92,11 +92,12 @@ class Hexapod {
             
         }*/
 
-        //L1.leg_cycle_straight(time);
+        L1.leg_cycle_straight(time);
+        L2.leg_cycle_straight(time);
+        L3.leg_cycle_straight(time);
+        R1.leg_cycle_straight(time);
         R2.leg_cycle_straight(time);
-        //L3.leg_cycle_straight(time);
-        //R1.leg_cycle_straight(time);
-        //R3.leg_cycle_straight(time);
+        R3.leg_cycle_straight(time);
 
     }
 
