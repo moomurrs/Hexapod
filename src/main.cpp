@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include "Hexapod.h"
+#include "Controller.h"
 
 // forward declaration
 bool parse_three_input();
 
 
 Hexapod hexapod{};
+Controller controller;
 
 int input[3];
 int range[3][2] = {{-30, 30},     // coxa
@@ -15,6 +17,9 @@ int range[3][2] = {{-30, 30},     // coxa
 enum Tests{Herp, Derp} typedef Test;
 
 void setup() {
+    // raspiberryi pi serial
+    Serial1.begin(2000000);
+
     Serial.begin(115200);
     Serial.setTimeout(100);
 
@@ -27,20 +32,31 @@ void setup() {
 
 }
 
-int speed_input = 1200;
+int speed_input = 1000;
 bool continue_loop = true;
+int left_stick = 0;
 
 void loop() {
 
-    /*
-    speed = get controller input
-    hexapod.update(speed, direction)
-    */
+    // see if raspberry sent information
+    if (Serial1.available() > 0) {
+        // read data until end of JSON
+        String data = Serial1.readStringUntil('}');
+        data.concat("}");
+        controller.update_controller(data);
+        
+    }
 
-    
-    if(continue_loop){
+    left_stick = controller.get_l3_axis(Y_AXIS);
+
+    if(left_stick < 0){
         hexapod.update(speed_input, false);
     }
+
+    /*
+    if(continue_loop){
+        hexapod.update(speed_input, false);
+    }*/
     
 
     if (Serial.available() > 0) {
