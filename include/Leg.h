@@ -1,7 +1,8 @@
+#include <Arduino.h>
 #include <PWMServo.h>
-
 enum Joint { COXA, FEMUR, TIBIA };
 enum Stance { POWER, POWER_MIDDLE, SWING, SWING_MIDDLE };
+bool previously_turning = false;
 
 int current_time = 1200;
 class Leg {
@@ -53,6 +54,11 @@ class Leg {
     int power_middle_straight[3];
     int swing_stance_straight[3];
     int swing_middle_straight[3];
+
+    int power_stance_turn[3];
+    int power_middle_turn[3];
+    int swing_stance_turn[3];
+    int swing_middle_turn[3];
 
     /* Set center values for the servos */
     void set_center(int coxa_center, int femur_center, int tibia_center) {
@@ -110,11 +116,26 @@ class Leg {
         this->current_stance = stance;
     }
 
+    void turn_to_power_stance(){
+        this->move_leg_from_center(this->power_stance_turn[COXA], this->power_stance_turn[FEMUR],this->power_stance_turn[TIBIA]);
+    }
+
+    void turn_to_power_middle(){
+        this->move_leg_from_center(this->power_middle_turn[COXA], this->power_middle_turn[FEMUR], this->power_middle_turn[TIBIA]);
+    }
+
+    void turn_to_swing_stance(){
+        this->move_leg_from_center(this->swing_stance_turn[COXA], this->swing_stance_turn[FEMUR], this->swing_stance_turn[TIBIA]);
+    }
+
+    void turn_to_swing_middle(){
+        this->move_leg_from_center(this->swing_middle_turn[COXA], this->swing_middle_turn[FEMUR], this->swing_middle_turn[TIBIA]);
+    }
+
+
     void leg_cycle_straight(int new_time) {
-        // set new targets and previous targets
-        if (new_time != current_leg_cycle_time) {
-            set_new_speeds(new_time);
-        } else if (progress_time[TIBIA] >= moving_time[TIBIA]) {
+        previously_turning = false;
+        if (progress_time[TIBIA] >= moving_time[TIBIA]) {
             Serial.printf("Changing stance: %d", this->current_stance);
 
             // progress time expired, move to next stance
@@ -271,6 +292,31 @@ class Leg {
                 this->swing_middle_straight[TIBIA] = tibia;
                 // Serial.printf("swing middle target: %d, %d, %d\n",
                 // power_stance_straight[COXA],power_stance_straight[FEMUR],power_stance_straight[TIBIA]);
+                break;
+        }
+    }
+
+    void initialize_turn_points(Stance stance, int coxa, int femur, int tibia) {
+        switch (stance) {
+            case POWER:
+                this->power_stance_turn[COXA] = coxa;
+                this->power_stance_turn[FEMUR] = femur;
+                this->power_stance_turn[TIBIA] = tibia;
+                break;
+            case POWER_MIDDLE:
+                this->power_middle_turn[COXA] = coxa;
+                this->power_middle_turn[FEMUR] = femur;
+                this->power_middle_turn[TIBIA] = tibia;
+                break;
+            case SWING:
+                this->swing_stance_turn[COXA] = coxa;
+                this->swing_stance_turn[FEMUR] = femur;
+                this->swing_stance_turn[TIBIA] = tibia;
+                break;
+            case SWING_MIDDLE:
+                this->swing_middle_turn[COXA] = coxa;
+                this->swing_middle_turn[FEMUR] = femur;
+                this->swing_middle_turn[TIBIA] = tibia;
                 break;
         }
     }
