@@ -34,11 +34,13 @@ void setup() {
 
 int speed_input = 1000;
 bool continue_loop = true;
-int left_stick = 0;
+int left_stick_y = 0;
+int right_stick_x = 0;
 
 void loop() {
 
     // see if raspberry sent information
+    /*
     if (Serial1.available() > 0) {
         // read data until end of JSON
         String data = Serial1.readStringUntil('}');
@@ -47,15 +49,20 @@ void loop() {
         
     }
 
-    left_stick = controller.get_l3_axis(Y_AXIS);
+    left_stick_y = controller.get_l3_axis(Y_AXIS);
 
-    if(left_stick < 0){
+    if(left_stick_y < 0){
+        // move straight for now at constant speed
         hexapod.update(speed_input, false);
-    }
+    }else if(right_stick_x > 0 || right_stick_x < 0){
+        hexapod.update(right_stick_x, true);
+    }*/
 
+    
     /*
     if(continue_loop){
-        hexapod.update(speed_input, false);
+        //hexapod.update(speed_input, true);
+        hexapod.update(3000, true);
     }*/
     
 
@@ -78,8 +85,10 @@ void loop() {
         Serial.printf("Input: %d\n", serial_input);
         if(serial_input == 0){
             continue_loop = false;
-        }else{
-            speed_input = serial_input;
+        }else if(serial_input == 1){
+            hexapod.turn(true);
+        }else if(serial_input == 2){
+            hexapod.turn(false);
         }
 
         Serial.clear();

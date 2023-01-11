@@ -30,10 +30,7 @@ class Hexapod {
         R3.set_center(90, 93, 145);
     }
 
-
-    void initialize(){
-        
-        
+    void initialize() {
         L1.set_initial_stance(POWER);
         L1.initialize_leg_timer();
         L1.initialize_stance_points(POWER, 25, 10, 65);
@@ -69,19 +66,106 @@ class Hexapod {
         R2.initialize_stance_points(SWING, 23, 43, 120);
         R2.initialize_stance_points(SWING_MIDDLE, 0, 50, 100);
 
-        
         R3.set_initial_stance(SWING);
         R3.initialize_leg_timer();
         R3.initialize_stance_points(POWER, -25, 45, 135);
         R3.initialize_stance_points(POWER_MIDDLE, 2, 40, 110);
         R3.initialize_stance_points(SWING, 20, 10, 65);
-        R3.initialize_stance_points(SWING_MIDDLE, -15, 60, 100);        
-        
+        R3.initialize_stance_points(SWING_MIDDLE, -15, 60, 100);
+
+        L1.initialize_turn_points(POWER, 30, 30, 100);
+        L1.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        L1.initialize_turn_points(SWING, -30, 30, 100);
+        L1.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
+
+        L2.initialize_turn_points(POWER, 30, 30, 100);
+        L2.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        L2.initialize_turn_points(SWING, -30, 30, 100);
+        L2.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
+
+        L3.initialize_turn_points(POWER, 30, 30, 100);
+        L3.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        L3.initialize_turn_points(SWING, -30, 30, 100);
+        L3.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
+
+        R1.initialize_turn_points(POWER, -30, 30, 100);
+        R1.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        R1.initialize_turn_points(SWING, 30, 30, 100);
+        R1.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
+
+        R2.initialize_turn_points(POWER, -30, 30, 100);
+        R2.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        R2.initialize_turn_points(SWING, 30, 30, 100);
+        R2.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
+
+        R3.initialize_turn_points(POWER, -30, 30, 100);
+        R3.initialize_turn_points(POWER_MIDDLE, 0, 30, 100);
+        R3.initialize_turn_points(SWING, 30, 30, 100);
+        R3.initialize_turn_points(SWING_MIDDLE, 0, 50, 90);
     }
 
+    void turn(bool is_right) {
+        int delay_time = 100;
+        L1.turn_to_power_middle();  // power middle all
+        L2.turn_to_power_middle();
+        L3.turn_to_power_middle();
+        R1.turn_to_power_middle();
+        R2.turn_to_power_middle();
+        R3.turn_to_power_middle();
+        delay(delay_time);
 
-    
-    void update(int time, bool is_turn){
+        L1.turn_to_power_middle();  // raise turning triangle
+        L2.turn_to_swing_middle();
+        L3.turn_to_power_middle();
+        R1.turn_to_swing_middle();
+        R2.turn_to_power_middle();
+        R3.turn_to_swing_middle();
+        delay(delay_time);
+
+        L1.turn_to_power_middle();  // move turning triangle to offset
+        L3.turn_to_power_middle();
+        R2.turn_to_power_middle();
+
+        if (is_right) {
+            // right turn
+            L2.turn_to_power_stance();
+            R1.turn_to_swing_stance();
+            R3.turn_to_swing_stance();
+        } else {
+            // left turn
+            L2.turn_to_swing_stance();
+            R1.turn_to_power_stance();
+            R3.turn_to_power_stance();
+        }
+        delay(delay_time);
+
+        L1.turn_to_swing_middle();  // raise support triangle
+        //L2.turn_to_power_stance();
+        L3.turn_to_swing_middle();
+        //R1.turn_to_swing_stance();
+        R2.turn_to_swing_middle();
+        //R3.turn_to_swing_stance();
+        delay(delay_time);
+
+        L1.turn_to_swing_middle();  // move turning triangle to power middle,
+                                    // rotating body
+        L2.turn_to_power_middle();
+        L3.turn_to_swing_middle();
+        R1.turn_to_power_middle();
+        R2.turn_to_swing_middle();
+        R3.turn_to_power_middle();
+        delay(delay_time);
+
+        L1.turn_to_power_middle();  // back to middle all
+        L2.turn_to_power_middle();
+        L3.turn_to_power_middle();
+        R1.turn_to_power_middle();
+        R2.turn_to_power_middle();
+        R3.turn_to_power_middle();
+        delay(delay_time);
+    }
+
+    void update(int time) {
         /*
         if (current_time == new_time) {
             // change speed of cycle
@@ -89,7 +173,7 @@ class Hexapod {
         } else {
             // continue cycle
 
-            
+
         }*/
 
         L1.leg_cycle_straight(time);
@@ -98,13 +182,11 @@ class Hexapod {
         R1.leg_cycle_straight(time);
         R2.leg_cycle_straight(time);
         R3.leg_cycle_straight(time);
-
     }
 
-    void manual_move(int coxa_angle, int femur_angle, int tibia_angle){
-        //L2.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
+    void manual_move(int coxa_angle, int femur_angle, int tibia_angle) {
+        R1.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
     }
-
 
     /* spread the joints of all legs out like a starfish */
     void center_all_legs() {
@@ -116,5 +198,4 @@ class Hexapod {
         L2.center_leg();
         L3.center_leg();
     }
-
 };
