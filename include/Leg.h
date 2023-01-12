@@ -60,6 +60,8 @@ class Leg {
     int swing_stance_turn[3];
     int swing_middle_turn[3];
 
+    int flower_offset[3] = {0, 30, -10};
+
     /* Set center values for the servos */
     void set_center(int coxa_center, int femur_center, int tibia_center) {
         this->coxa_center_point = coxa_center;
@@ -130,6 +132,10 @@ class Leg {
 
     void turn_to_swing_middle(){
         this->move_leg_from_center(this->swing_middle_turn[COXA], this->swing_middle_turn[FEMUR], this->swing_middle_turn[TIBIA]);
+    }
+
+    void flower_leg(){
+        this->move_leg_from_center(this->flower_offset[COXA], this->flower_offset[FEMUR], this->flower_offset[TIBIA]);
     }
 
 

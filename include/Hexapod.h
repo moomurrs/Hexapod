@@ -177,7 +177,7 @@ class Hexapod {
     }
 
     void manual_move(int coxa_angle, int femur_angle, int tibia_angle) {
-        //R1.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
+        L1.move_leg_from_center(coxa_angle, femur_angle, tibia_angle);
     }
 
     /* spread the joints of all legs out like a starfish */
@@ -189,5 +189,23 @@ class Hexapod {
         L1.center_leg();
         L2.center_leg();
         L3.center_leg();
+    }
+
+    void idle_all_legs(){
+        R1.turn_to_power_middle();
+        R2.turn_to_power_middle();
+        R3.turn_to_power_middle();
+        L1.turn_to_power_middle();
+        L2.turn_to_power_middle();
+        L3.turn_to_power_middle();
+    }
+
+    void flower_all_legs(){
+        R1.flower_leg();
+        R2.flower_leg();
+        R3.flower_leg();
+        L1.flower_leg();
+        L2.flower_leg();
+        L3.flower_leg();
     }
 };

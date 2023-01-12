@@ -5,6 +5,7 @@
 
 // forward declaration
 bool parse_three_input();
+void initial_boot();
 
 Hexapod hexapod{};
 Controller controller;
@@ -27,13 +28,18 @@ void setup() {
 
     // set the initial target angles for each leg
     hexapod.initialize();
+
+    hexapod.flower_all_legs();
+    delay(1000);
 }
 
-// bool continue_loop = true;
+bool initialized = false;
+bool continue_loop = true;
 
 void loop() {
     // see if raspberry sent information
 
+    
     if (Serial1.available() > 0) {
         // read data until end of JSON
         String data = Serial1.readStringUntil('}');
@@ -41,18 +47,25 @@ void loop() {
         controller.update_controller(data);
     }
 
-    if (controller.get_dpad_button(UP)) {
-        // move forward on press
-        //Serial.println("up pressed");
-        hexapod.move_forward(2000);
-    } else if (controller.get_dpad_button(RIGHT)) {
-        // turn right
-        //Serial.println("right pressed");
-        hexapod.turn(true);
-    } else if (controller.get_dpad_button(LEFT)) {
-        // turn left
-        //Serial.println("left pressed");
-        hexapod.turn(false);
+    if (!initialized) {
+        if(controller.get_symbol_button(X) == true){
+            initial_boot();
+        }
+        
+    } else {
+        if (controller.get_dpad_button(UP)) {
+            // move forward on press
+            // Serial.println("up pressed");
+            hexapod.move_forward(2000);
+        } else if (controller.get_dpad_button(RIGHT)) {
+            // turn right
+            // Serial.println("right pressed");
+            hexapod.turn(true);
+        } else if (controller.get_dpad_button(LEFT)) {
+            // turn left
+            // Serial.println("left pressed");
+            hexapod.turn(false);
+        }
     }
 
     /*
@@ -81,7 +94,7 @@ void loop() {
         if (serial_input == 0) {
             continue_loop = false;
         } else {
-            continue_loop = false;
+            
         }*/
 
         Serial.clear();
@@ -90,6 +103,15 @@ void loop() {
         // Serial.println((String) "progress: " + L3.progress_time + ", target:
         // " + L3.target_angle);
     }
+}
+
+void initial_boot() {
+    hexapod.center_all_legs();
+    delay(3000);
+
+    hexapod.idle_all_legs();
+    delay(1000);
+    initialized = true;
 }
 
 bool parse_three_input() {
