@@ -42,7 +42,7 @@ class Leg {
 
     unsigned long start_time[3];
     unsigned long progress_time[3];
-    unsigned long moving_time[3] = {500, 500, 500};
+    unsigned long moving_time[3] = {300, 300, 300};
     int target_angle[3];
     int previous_target_angle[3];
     int current_angle_offset[3];

@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include "Hexapod.h"
+
 #include "Controller.h"
+#include "Hexapod.h"
 
 // forward declaration
 bool parse_three_input();
-
 
 Hexapod hexapod{};
 Controller controller;
@@ -14,57 +14,52 @@ int range[3][2] = {{-30, 30},     // coxa
                    {-60, 60},     // femur
                    {-140, 140}};  // tibia
 
-enum Tests{Herp, Derp} typedef Test;
-
 void setup() {
     // raspiberryi pi serial
     Serial1.begin(2000000);
 
+    // desktop serial
     Serial.begin(115200);
     Serial.setTimeout(100);
 
+    // set center calibration points for joints
     hexapod.set_calibration();
 
-    
     // set the initial target angles for each leg
-    hexapod.initialize(); 
-
-
+    hexapod.initialize();
 }
 
-int speed_input = 1000;
-bool continue_loop = true;
-int left_stick_y = 0;
-int right_stick_x = 0;
+// bool continue_loop = true;
 
 void loop() {
-
     // see if raspberry sent information
-    /*
+
     if (Serial1.available() > 0) {
         // read data until end of JSON
         String data = Serial1.readStringUntil('}');
         data.concat("}");
         controller.update_controller(data);
-        
     }
 
-    left_stick_y = controller.get_l3_axis(Y_AXIS);
+    if (controller.get_dpad_button(UP)) {
+        // move forward on press
+        //Serial.println("up pressed");
+        hexapod.move_forward(2000);
+    } else if (controller.get_dpad_button(RIGHT)) {
+        // turn right
+        //Serial.println("right pressed");
+        hexapod.turn(true);
+    } else if (controller.get_dpad_button(LEFT)) {
+        // turn left
+        //Serial.println("left pressed");
+        hexapod.turn(false);
+    }
 
-    if(left_stick_y < 0){
-        // move straight for now at constant speed
-        hexapod.update(speed_input, false);
-    }else if(right_stick_x > 0 || right_stick_x < 0){
-        hexapod.update(right_stick_x, true);
-    }*/
-
-    
     /*
     if(continue_loop){
         //hexapod.update(speed_input, true);
         hexapod.update(3000, true);
     }*/
-    
 
     if (Serial.available() > 0) {
         // angle = Serial.parseInt();
@@ -80,16 +75,14 @@ void loop() {
             hexapod.manual_move(input[0], input[1], input[2]);
         }*/
 
-        
+        /*
         int serial_input = Serial.parseInt();
         Serial.printf("Input: %d\n", serial_input);
-        if(serial_input == 0){
+        if (serial_input == 0) {
             continue_loop = false;
-        }else if(serial_input == 1){
-            hexapod.turn(true);
-        }else if(serial_input == 2){
-            hexapod.turn(false);
-        }
+        } else {
+            continue_loop = false;
+        }*/
 
         Serial.clear();
         delay(20);
@@ -98,8 +91,6 @@ void loop() {
         // " + L3.target_angle);
     }
 }
-
-
 
 bool parse_three_input() {
     for (int i = 0; i < 3; i++) {
@@ -126,4 +117,3 @@ bool parse_three_input() {
 
     return false;
 }
-
