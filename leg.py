@@ -1,5 +1,5 @@
 from servo import Servo, servo2040
-from math import atan2, cos, sin, acos, sqrt, degrees, radians, pi
+from math import atan2, cos, sin, acos, sqrt, degrees, radians, pi, trunc
 from time import sleep_ms, ticks_ms
 from wait import is_timer_expired, reset_timer
 from tween import linear_interpolate
@@ -19,6 +19,9 @@ class Leg:
     y_center:int = 100
     y_min:int = 60
     z_ground:int = 60
+    
+    # base increment must be divisible by 6 and 12
+    base_increment:float = 1 / 12 
      
     # initialize servos
     def __init__(self,
@@ -36,30 +39,40 @@ class Leg:
         self.femur_offset:int = femur_offset
         self.tibia_offset:int = tibia_offset
         
-        # cartesian in mm
-        self.x:int = 0
-        self.y:int = 0
-        self.z:int = 0
         
         # angle in rads
         self.coxa_angle:float = 0.0
         self.femur_angle:float = 0.0
         self.tibia_angle:float = 0.0
         
-        # each joint has their own timer for delay
-        self.coxa_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
-        self.femur_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
-        self.tibia_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
-        
         self.leg_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
         
-        # each joint has a flag to indicate if it has completed a move command
-        self.is_coxa_ready = True
-        self.is_femur_ready = True
-        self.is_tibia_ready = True
-        
+        # each leg tracks its progress along its path
         self.cycle_progress:float = 0.0
-        self.cycle_increment:float = 0.1
+        self.cycle_increment:float = Leg.base_increment
+        self.power_stroke_multiplier:int = 1
+        self.return_stroke_multiplier:int = 1
+        
+        
+        # the legs are positioned around the body at different angles
+        # its offset angle (degrees) must be considered before calculating inverse kinematics
+        # R1:  45, R2:   0, R3: 315
+        # L1: 135, L2: 180, L3: 225
+        self.leg_angle_offset:int = 0
+        if self.id is "R1":
+            self.leg_angle_offset = 45
+        elif self.id is "R2":
+            self.leg_angle_offset = 0
+        elif self.id is "R3":
+            self.leg_angle_offset = 315
+        elif self.id is "L1":
+            self.leg_angle_offset = 135
+        elif self.id is "L2":
+            self.leg_angle_offset = 180
+        elif self.id is "L3":
+            self.leg_angle_offset = 225
+        else:
+            print("ERROR: bad leg name")
     
     # enable/disable leg servos
     def enable_leg(self, is_enable:bool):
@@ -79,23 +92,25 @@ class Leg:
             print("disabled: " + self.id)
     
     
-    # move the leg using a triangular profile
-    def triangle_profile(self, is_forward=True):
-        delay_interval:int = Leg.period // 75
-        # power stroke
-        for x in range(50, -51, -1):
-            self.move_to_xyz(x, 100, 60)
-            sleep_ms(delay_interval)
+    def change_leg_timings(self, cycle:float, is_power_stroke:bool, power_mult:int, return_mult:int):
+        self.cycle_progress = cycle
         
-        # return stroke (assume current position is at (-50, 100, 60))
-        # top half of return stroke
-        for x in range(-50, 0):
-            self.move_to_xyz(x, 100, 60)
-            sleep_ms(delay_interval // 2)
-        # bottom half of return stroke
-        for x in range(0, 50):
-            self.move_to_xyz(x, 100, 60)
-            sleep_ms(delay_interval // 2)
+        if power_mult < 1 or return_mult < 1:
+            print("WARNING: power/return multiplier cannot be less than 0, using default")
+            return
+        
+        self.power_stroke_multiplier = power_mult
+        self.return_stroke_multiplier = return_mult
+        
+        #self.cycle_increment = increment
+        if is_power_stroke:
+            # positive increment is power stroke
+            self.cycle_increment = Leg.base_increment / self.power_stroke_multiplier
+        else:
+            # negative increment is return stroke
+            self.cycle_increment = -Leg.base_increment / self.return_stroke_multiplier
+        
+        
     
     # mm units for xyz
     def move_to_xyz(self, x:int, y:int, z:int):
@@ -210,49 +225,48 @@ class Leg:
             # move in a circle, 80mm in diameter
             self.move_to_xyz(40 * sin(ticks_ms() / 500), 100 + 40 * cos(ticks_ms() / 500), 60)
             sleep_ms(10)
-    
-    # angles are degrees
-    def power_stroke(self, direction_angle:int, offset_angle:int) -> None:
-        direction_rad:float = radians(direction_angle)
-        
-        for i in range(10, -10 - 2, -2):
-            fractional_path = i / 10
-            
-            x = fractional_path * 40 * sin(direction_rad)
-            y = 100 + (fractional_path * 40 * cos(direction_rad))
-            
-            print(str(fractional_path) + ", x: " + str(x) + ", y: " + str(y))
-    
+    # power stroke:  [0, 1)
+    # return stroke: [1, 0)
     def increment_progress(self):
-        if self.cycle_progress > 0.9:
-            self.cycle_increment = -0.1
-        elif self.cycle_progress < 0.1:
-            self.cycle_increment = 0.1
+        if self.cycle_progress > 0.9999 :
+            # switch to return stroke, from power stroke
+            self.cycle_increment = -Leg.base_increment / self.return_stroke_multiplier
+        elif self.cycle_progress < 0.0001:
+            # switch to power stroke speed, from return stroke
+            self.cycle_increment = Leg.base_increment / self.power_stroke_multiplier
+         
+        self.cycle_progress = self.cycle_progress + self.cycle_increment
         
-        self.cycle_progress = round(self.cycle_progress + self.cycle_increment, 2)
+        if self.cycle_progress > 0.999:
+            self.cycle_progress = 1.0
+        elif self.cycle_progress < 0.001:
+            self.cycle_progress = 0.0
+        
+        print("progress: " + str(self.cycle_progress))
     
     def update_leg(self, directional_angle:int, stroke_length:int):
-        current_progress:float = round(linear_interpolate(self.cycle_progress, 0, 1, 1, -1), 2)
+        #print("incoming progress: " + f'{self.cycle_progress:.8f}')
+        trig_radius:float = round(linear_interpolate(self.cycle_progress, 0, 1, 1, -1), 2)
         #self.r1_progress = round(self.r1_progress + 0.1, 2) % 1.1
-        print("progress: " + str(current_progress))
-        direction_rad:float = radians(directional_angle)
+        #print("progress: " + str(current_progress))
+        direction_rad:float = radians(directional_angle - self.leg_angle_offset)
         
         
         z:int = 60
         
-        x:int = round(current_progress * self.x_max * sin(direction_rad))
-        y:int = round(self.y_center + (current_progress * self.x_max * cos(direction_rad)))
+        x:int = round(trig_radius * self.x_max * sin(direction_rad))
+        y:int = round(self.y_center + (trig_radius * self.x_max * cos(direction_rad)))
         
         if self.cycle_increment < 0:
             #cos_input = linear_interpolate(self.r1_progress, 0, 1, 0, pi)
             #z = 60 - abs(round((20 * abs(cos(cos_input)))) - 20)
             sin_input = linear_interpolate(self.cycle_progress, 0, 1, 0, pi)
-            z = 60 - round((20 * sin(sin_input)))
+            z = 60 - round(20 * sin(sin_input))
         
-        print("xyz: " + str(x) + ", "  + str(y) + ", " + str(z))
-        self.move_to_xyz(x, y, z)
-        
+        #print("xyz: " + str(x) + ", "  + str(y) + ", " + str(z))
+        #self.move_to_xyz(x, y, z)
         self.increment_progress()
+        
     
     def coxa_rawvalue(self, raw_angle:int) -> None:
         self.coxa_port.value(raw_angle)
