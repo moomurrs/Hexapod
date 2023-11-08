@@ -1,7 +1,8 @@
 from machine import I2C, Pin
 from time import sleep_ms
 from tween import linear_interpolate
-i2c = I2C(0, scl=Pin(21), sda=Pin(20), freq=100_000)
+from servo import servo2040
+i2c = I2C(0, scl=Pin(servo2040.SCL), sda=Pin(servo2040.SDA), freq=100_000)
 
 print("device id: " + str(i2c.scan()))
 
@@ -49,3 +50,4 @@ while True:
     print("raw rx: " + str(rx_raw) + ", normalized rx: " + str(rx) + "raw ry: " + str(ry_raw) + ", normalized ry: " + str(ry))
     #print("rx: " + str(rx) + ", ry: " + str(ry) + " lx: " + str(lx) + ", ly: " + str(ly))
     sleep_ms(500)
+
