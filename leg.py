@@ -1,13 +1,10 @@
-from servo import Servo, servo2040
+from servo import Servo, servo2040, ServoCluster
 from math import atan2, cos, sin, acos, sqrt, degrees, radians, pi, trunc
 from time import sleep_ms, ticks_ms
 from wait import is_timer_expired, reset_timer
 from tween import linear_interpolate
 class Leg:
-    
-    # duration (ms) to complete a single stroke (either power or return stroke)
-    period:int = 750
-    
+        
     # static segment length (mm)
     coxa_length:int = 27
     femur_length:int = 43
@@ -21,30 +18,32 @@ class Leg:
     z_ground:int = 60
     
     # base increment must be divisible by 6 and 12
-    base_increment:float = 1 / 12 
-     
+    base_increment:float = 1 / 12
+    
+    # servo cluster (0-17) addressable as a class variable
+    cluster = cluster = ServoCluster(0, 0, list(range(servo2040.SERVO_1, servo2040.SERVO_18 + 1)))
+    
     # initialize servos
     def __init__(self,
-                 coxa_port:servo2040, coxa_cal, coxa_offset,
-                 femur_port:servo2040, femur_cal, femur_offset,
-                 tibia_port:servo2040, tibia_cal, tibia_offset,
+                 coxa_port:int, coxa_cal, coxa_offset,
+                 femur_port:int, femur_cal, femur_offset,
+                 tibia_port:int, tibia_cal, tibia_offset,
                  id:str):
-        
-        self.coxa_port:Servo = Servo(coxa_port, coxa_cal)
-        self.femur_port:Servo = Servo(femur_port, femur_cal)
-        self.tibia_port:Servo = Servo(tibia_port, tibia_cal)
+        # each leg instance keeps track of 3 servo ports & calibrations
+        self.coxa_port:int = coxa_port
+        self.femur_port:int = femur_port
+        self.tibia_port:int = tibia_port
         self.id:str = id
         
         self.coxa_offset:int = coxa_offset
         self.femur_offset:int = femur_offset
         self.tibia_offset:int = tibia_offset
         
-        
-        # angle in rads
-        self.coxa_angle:float = 0.0
-        self.femur_angle:float = 0.0
-        self.tibia_angle:float = 0.0
-        
+        # inject class variable with calibration objects
+        Leg.cluster.calibration(self.coxa_port, coxa_cal)
+        Leg.cluster.calibration(self.femur_port, femur_cal)
+        Leg.cluster.calibration(self.tibia_port, tibia_cal)
+                
         self.leg_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
         
         # each leg tracks its progress along its path
@@ -52,13 +51,13 @@ class Leg:
         self.cycle_increment:float = Leg.base_increment
         self.power_stroke_multiplier:int = 1
         self.return_stroke_multiplier:int = 1
-        
-        
+                
         # the legs are positioned around the body at different angles
         # its offset angle (degrees) must be considered before calculating inverse kinematics
         # R1:  45, R2:   0, R3: 315
         # L1: 135, L2: 180, L3: 225
         self.leg_angle_offset:int = 0
+        
         if self.id is "R1":
             self.leg_angle_offset = 45
         elif self.id is "R2":
@@ -73,24 +72,6 @@ class Leg:
             self.leg_angle_offset = 225
         else:
             print("ERROR: bad leg name")
-    
-    # enable/disable leg servos
-    def enable_leg(self, is_enable:bool):
-        if is_enable:
-            self.coxa_port.enable()
-            self.femur_port.enable()
-            self.tibia_port.enable()
-            print("enabled: " + self.id)
-        else:
-            if self.coxa_port.is_enabled():
-                self.coxa_port.disable()
-            if self.femur_port.is_enabled():
-                self.femur_port.disable()
-            if self.tibia_port.is_enabled():
-                self.tibia_port.disable()
-                
-            print("disabled: " + self.id)
-    
     
     def change_leg_timings(self, cycle:float, is_power_stroke:bool, power_mult:int, return_mult:int):
         self.cycle_progress = cycle
@@ -109,7 +90,6 @@ class Leg:
         else:
             # negative increment is return stroke
             self.cycle_increment = -Leg.base_increment / self.return_stroke_multiplier
-        
         
     
     # mm units for xyz
@@ -242,7 +222,7 @@ class Leg:
         elif self.cycle_progress < 0.001:
             self.cycle_progress = 0.0
         
-        print("progress: " + str(self.cycle_progress))
+        #print("progress: " + str(self.cycle_progress))
     
     def update_leg(self, directional_angle:int, stroke_length:int):
         #print("incoming progress: " + f'{self.cycle_progress:.8f}')
@@ -264,24 +244,24 @@ class Leg:
             z = 60 - round(20 * sin(sin_input))
         
         #print("xyz: " + str(x) + ", "  + str(y) + ", " + str(z))
-        #self.move_to_xyz(x, y, z)
+        self.move_to_xyz(x, y, z)
         self.increment_progress()
         
     
     def coxa_rawvalue(self, raw_angle:int) -> None:
-        self.coxa_port.value(raw_angle)
+        Leg.cluster.value(self.coxa_port, raw_angle)
     
     def femur_rawvalue(self, raw_angle:int) -> None:
-        self.femur_port.value(-raw_angle)
+        Leg.cluster.value(self.femur_port, raw_angle)
             
     def tibia_rawvalue(self, raw_angle:int) -> None:
-        self.tibia_port.value(raw_angle)
+        Leg.cluster.value(self.femur_port, raw_angle)
     
     def coxa_value(self, raw_angle:int) -> None:
         servo_range:int = 70
         adjusted_angle = raw_angle + self.coxa_offset
         if adjusted_angle <= servo_range and adjusted_angle >= -servo_range:
-            self.coxa_port.value(adjusted_angle)
+            Leg.cluster.value(self.coxa_port, adjusted_angle)
         else:
             print("WARNING: coxa input angle out of range")
     
@@ -289,7 +269,7 @@ class Leg:
         servo_range:int = 80
         adjusted_angle = raw_angle + self.femur_offset
         if adjusted_angle <= servo_range and adjusted_angle >= -servo_range:
-            self.femur_port.value(-adjusted_angle)
+            Leg.cluster.value(self.femur_port, -adjusted_angle)
         else:
             print("WARNING: femur input angle out of range")
             
@@ -297,7 +277,7 @@ class Leg:
         tibia_limit:int = 45
         adjusted_angle = raw_angle + self.tibia_offset
         if adjusted_angle <= 180 and adjusted_angle >= tibia_limit:
-            self.tibia_port.value(adjusted_angle)
+            Leg.cluster.value(self.tibia_port, adjusted_angle)
         else:
             print("WARNING: tibia input angle out of range")
     
@@ -329,38 +309,4 @@ class Leg:
                 print("tibia expired")
         else:
             print("ERROR: wait joint name mismatch")
-
-
-def ease_joint(current_time:int, start_time:int, end_time:int, start_angle:int, end_angle:int) -> None:
-    new_servo_target = easeout_sine_tween(current_time, start_angle, end_time, start_angle, end_angle)
-
-def easeout_sine_tween(input, in_min, in_max, start_angle, end_angle) -> float:
     
-    # TODO:
-    # [in_min, in_max] -> [0, pi/2] -> [out_min, out_max]
-    
-    out_min:float = 0.0
-    out_max:float = 1.0
-    if input < in_min:
-        print("WARNING: sine tween min clamped")
-        return out_min
-    elif input > in_max:
-        print("WARNING: sine tween max clamped")
-        return out_max
-    else:
-        # map start/end movement time to [0, pi/2] using current time
-        time_to_sine_input_interpolate:float = linear_interpolate(input, in_min, in_max, out_min, out_max)
-        
-        # create sine output
-        sine_output_current = sin(time_to_sine_input_interpolate)
-        
-        # map sine output [0, 1] to servo start/end to get where servo should be at this time (keyframe)
-        servo_current_target = linear_interpolate(sine_output_current, out_min, out_max, start_angle, end_angle)
-        
-        return None
-
-def linear_tween(input, in_min, in_max) -> float:
-    out_min:float = 0.0
-    out_max:float = 1.0
-    
-    return linear_interpolate(input, in_min, in_max, out_min, out_max)

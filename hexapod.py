@@ -56,7 +56,7 @@ class Hexapod:
         if gait_name is "tripod":
             if gait_name == self.current_gait:
                 # continue tripod gait as normal
-                #self.r1.update_leg(directional_angle, strength)
+                self.r1.update_leg(directional_angle, strength)
                 self.r2.update_leg(directional_angle, strength)
                 self.r3.update_leg(directional_angle, strength)
                 self.l1.update_leg(directional_angle, strength)
@@ -69,10 +69,10 @@ class Hexapod:
                 self.current_gait = "tripod"
                 
                 # group 1
-                #self.r1.change_leg_timings(0.0, # position leg at start of power stroke
-                #                           True, # specify power stroke increment
-                #                           1,   # indicate how long power stroke should be (5x long)
-                #                           1)   # indicate how long return stroke should be
+                self.r1.change_leg_timings(0.0, # position leg at start of power stroke
+                                           True, # specify power stroke increment
+                                           1,   # indicate how long power stroke should be (5x long)
+                                           1)   # indicate how long return stroke should be
                 self.l2.change_leg_timings(0.0, True, 1, 1)
                 self.r3.change_leg_timings(0.0, True, 1, 1)
                 
@@ -96,3 +96,4 @@ class Hexapod:
             self.l3.move_to_xyz(x, y, z)
         else:
             print("bad input")
+
