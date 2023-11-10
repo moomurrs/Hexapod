@@ -8,7 +8,9 @@ unsigned int rx = 0;
 unsigned int ry = 0;
 unsigned int lx = 0;
 unsigned int ly = 0;
-unsigned int button_misc = 0;
+unsigned int buttons = 0;
+unsigned char dpad = 0;
+unsigned char misc = 0;
 
 void setup() {
     Wire.setClock(100000);
@@ -56,17 +58,26 @@ void requestEvent() {
     Wire.write(higher_char);
     Wire.write(lower_char);
 
-    // send button misc
-    higher_char = (button_misc >> 8) & mask;
-    lower_char = button_misc & mask;
+    // send buttons bitmask
+    higher_char = (buttons >> 8) & mask;
+    lower_char = buttons & mask;
 
     Wire.write(higher_char);
     Wire.write(lower_char);
+
+    // send dpad char
+    Wire.write(dpad);
+
+    // send misc button char
+    Wire.write(misc);
 
     rx++;
     ry += 2;
     lx += 4;
     ly += 8;
-    button_misc += 16;
-    Serial.printf("rx: %d, ry: %d, lx: %d, ly: %d, button: %d\n", rx, ry, lx, ly, button_misc);
+    buttons += 16;
+    dpad += 1;
+    misc += 1;
+    
+    Serial.printf("rx: %d, ry: %d, lx: %d, ly: %d, buttons: %x, dpad: %x, misc: %x\n", rx, ry, lx, ly, buttons, dpad, misc);
 }
