@@ -56,14 +56,13 @@ class Hexapod:
         if gait_name is "tripod":
             if gait_name == self.current_gait:
                 # continue tripod gait as normal
-                self.r1.update_leg(directional_angle, strength)
-                self.r2.update_leg(directional_angle, strength)
+                #self.r1.update_leg(directional_angle, strength)
+                #self.r2.update_leg(directional_angle, strength)
                 self.r3.update_leg(directional_angle, strength)
-                self.l1.update_leg(directional_angle, strength)
-                self.l2.update_leg(directional_angle, strength)
-                self.l3.update_leg(directional_angle, strength)
-                
-                sleep_ms(50)
+                #self.l1.update_leg(directional_angle, strength)
+                #self.l2.update_leg(directional_angle, strength)
+                #self.l3.update_leg(directional_angle, strength)
+                sleep_ms(10)
             else:
                 # new gait request, set legs to tripod gait offset
                 self.current_gait = "tripod"
@@ -80,6 +79,29 @@ class Hexapod:
                 self.l1.change_leg_timings(1.0, False, 1, 1)
                 self.r2.change_leg_timings(1.0, False, 1, 1)
                 self.l3.change_leg_timings(1.0, False, 1, 1)
+        
+        if gait_name is "wave":
+            if gait_name == self.current_gait:
+                # continue wave gait as normal
+                self.r1.update_leg(directional_angle, strength)
+                self.r2.update_leg(directional_angle, strength)
+                self.r3.update_leg(directional_angle, strength)
+                self.l1.update_leg(directional_angle, strength)
+                self.l2.update_leg(directional_angle, strength)
+                self.l3.update_leg(directional_angle, strength)
+                
+                sleep_ms(10)
+            else:
+                # new gait request, set legs to tripod gait offset
+                self.current_gait = "wave"
+                
+                self.r1.change_leg_timings(0, True, 5, 1)
+                self.r2.change_leg_timings(1 / 5, True, 5, 1)
+                self.r3.change_leg_timings(2 / 5, True, 5, 1)
+                
+                self.l1.change_leg_timings(3 / 5, True, 5, 1)
+                self.l2.change_leg_timings(4 / 5, True, 5, 1)
+                self.l3.change_leg_timings(5 / 5, True, 5, 1)
     
     def move_leg_xyz(self, leg_name:str, x:int, y:int, z:int):
         if leg_name is "R1":

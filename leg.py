@@ -10,15 +10,15 @@ class Leg:
     femur_length:int = 43
     tibia_length:int = 89
     
-    x_max:int = 40
-    x_min:int = -40
-    y_max:int = 140
+    x_max:int = 25
+    x_min:int = -x_max
     y_center:int = 100
-    y_min:int = 60
+    y_max:int = y_center + x_max
+    y_min:int = y_center - x_max
     z_ground:int = 60
     
     # base increment must be divisible by 6 and 12
-    base_increment:float = 1 / 12
+    base_increment:float = 1 / 60
     
     # servo cluster (0-17) addressable as a class variable
     cluster = cluster = ServoCluster(0, 0, list(range(servo2040.SERVO_1, servo2040.SERVO_18 + 1)))
@@ -208,18 +208,18 @@ class Leg:
     # power stroke:  [0, 1)
     # return stroke: [1, 0)
     def increment_progress(self):
-        if self.cycle_progress > 0.9999 :
+        if self.cycle_progress > 0.99999 :
             # switch to return stroke, from power stroke
             self.cycle_increment = -Leg.base_increment / self.return_stroke_multiplier
-        elif self.cycle_progress < 0.0001:
+        elif self.cycle_progress < 0.00001:
             # switch to power stroke speed, from return stroke
             self.cycle_increment = Leg.base_increment / self.power_stroke_multiplier
          
         self.cycle_progress = self.cycle_progress + self.cycle_increment
         
-        if self.cycle_progress > 0.999:
+        if self.cycle_progress > 0.9999:
             self.cycle_progress = 1.0
-        elif self.cycle_progress < 0.001:
+        elif self.cycle_progress < 0.0001:
             self.cycle_progress = 0.0
         
         #print("progress: " + str(self.cycle_progress))
@@ -232,7 +232,7 @@ class Leg:
         direction_rad:float = radians(directional_angle - self.leg_angle_offset)
         
         
-        z:int = 60
+        z:int = Leg.z_ground
         
         x:int = round(trig_radius * self.x_max * sin(direction_rad))
         y:int = round(self.y_center + (trig_radius * self.x_max * cos(direction_rad)))
@@ -241,7 +241,7 @@ class Leg:
             #cos_input = linear_interpolate(self.r1_progress, 0, 1, 0, pi)
             #z = 60 - abs(round((20 * abs(cos(cos_input)))) - 20)
             sin_input = linear_interpolate(self.cycle_progress, 0, 1, 0, pi)
-            z = 60 - round(20 * sin(sin_input))
+            z = Leg.z_ground - round(30 * sin(sin_input))
         
         #print("xyz: " + str(x) + ", "  + str(y) + ", " + str(z))
         self.move_to_xyz(x, y, z)

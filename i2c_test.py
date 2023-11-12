@@ -3,6 +3,7 @@ from time import sleep_ms
 from tween import linear_interpolate
 from servo import servo2040
 i2c = I2C(0, scl=Pin(servo2040.SCL), sda=Pin(servo2040.SDA), freq=100_000)
+from math import sqrt, sin, atan2, degrees, pi
 
 print("device id: " + str(i2c.scan()))
 
@@ -50,21 +51,44 @@ while True:
     
     lx_raw = buttons = (int.from_bytes(hex_stream, "big") >> (8 * 6)) & two_byte_mask
     
-    ry_raw = buttons = (int.from_bytes(hex_stream, "big") >> (8 * 8)) & two_byte_mask
+    ry_raw = buttons = ((int.from_bytes(hex_stream, "big") >> (8 * 8)) & two_byte_mask) - 508
     
-    rx_raw = buttons = (int.from_bytes(hex_stream, "big") >> (8 * 10)) & two_byte_mask
+    rx_raw = buttons = ((int.from_bytes(hex_stream, "big") >> (8 * 10)) & two_byte_mask) - 508
     
     
     # normalize controller value
     # PS4 controller has min value -508, max value 512
-    ry = linear_interpolate(ry_raw, 0, 1020, 1.0, -1.0)
-    rx = linear_interpolate(rx_raw, 0, 1020, -1.0, 1.0)
-    ly = linear_interpolate(ly_raw, 0, 1020, 1.0, -1.0)
-    lx = linear_interpolate(lx_raw, 0, 1020, -1.0, 1.0)
+    if ry_raw <= 0:
+        # north quads
+        ry = linear_interpolate(ry_raw, 0, -508, 0.0, 1.0)
+    else:
+        # south quds
+        ry = linear_interpolate(ry_raw, 0, 512, 0.0, -1.0)
+    
+    if rx_raw <= 0:
+        # east quads
+        rx = linear_interpolate(rx_raw, 0, -508, 0.0, -1.0)
+    else:
+        # west quads
+        rx = linear_interpolate(rx_raw, 0, 512, 0.0, 1.0)
+     
+    #rx = linear_interpolate(rx_raw, 0, 1020, -1.0, 1.0) / 1.414214
+    #ry = linear_interpolate(ry_raw, 0, 1020, 1.0, -1.0) / 1.414214
+    
+    r = sqrt(rx * rx + ry * ry)
+    theta = atan2(ry, rx)
+    
+    if theta < 0:
+        # theta is clockwise, we need counter-clockwise
+        theta = pi + (pi + theta)
+     
     
     #print("raw rx: " + str(rx_raw) + ", normalized rx: " + str(rx) + "raw ry: " + str(ry_raw) + ", normalized ry: " + str(ry) + ", button: " + str(button_raw))
     #print("raw rx: " + str(rx_raw) + " raw ry: " + str(ry_raw) + ", raw lx: " + str(lx_raw) + ", raw ly: " + str(ly_raw) + ", buttons: " + str(buttons) + ", dpad: " + str(dpad) + ", misc: " + str(misc))
     #print("raw rx: " + str(rx_raw) + " raw ry: " + str(ry_raw))
-    print("rx: " + str(rx) + ", ry: " + str(ry) + ", lx: " + str(lx) + ", ly: " + str(ly))
+    #print("rx: " + str(rx) + ", ry: " + str(ry) + ", lx: " + str(lx) + ", ly: " + str(ly))
+    #print("theta: " + str(degrees(theta)) + ", radius: " + str(r))
+    #print("raw rx: " + str(rx_raw) + " raw ry: " + str(ry_raw) + " rx: " + str(rx) + ", ry: " + str(ry) + ", radius: " + str(r) + "theta: " + str(degrees(theta)) )
+    print("radius: " + str(r) + "theta: " + str(degrees(theta)) + "mult: " + str(m))
     sleep_ms(50)
 
