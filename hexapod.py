@@ -5,7 +5,6 @@ from servo import Servo, servo2040
 from leg import Leg
 from calibration import r1_leg_cal, r2_leg_cal, r3_leg_cal, l1_leg_cal, l2_leg_cal, l3_leg_cal
 from tween import linear_interpolate
-from wait import is_timer_expired, reset_timer
 
 user_sw = Button(servo2040.USER_SW)
 
@@ -22,7 +21,6 @@ class Hexapod:
     # static members
     r1_progress:float = 0.0
     r1_increment:float = 0.1
-    timer:dict = {"start_time" : 0, "duration" : 0, "in_progress" : False}
     # initial gait is always empty, request a new gait on instande
     current_gait:str = None
     
@@ -51,18 +49,22 @@ class Hexapod:
                             servo2040.SERVO_17, l3_leg_cal["femur_cal"], 0,
                             servo2040.SERVO_16, l3_leg_cal["tibia_cal"], 0,
                             "L3")
+        #self.timer = Timer(50)
     
     def update(self, directional_angle:int, strength:float, gait_name:str):
+        if strength < 0.2:
+            return
         if gait_name is "tripod":
             if gait_name == self.current_gait:
                 # continue tripod gait as normal
-                #self.r1.update_leg(directional_angle, strength)
-                #self.r2.update_leg(directional_angle, strength)
+                self.r1.update_leg(directional_angle, strength)
+                self.r2.update_leg(directional_angle, strength)
                 self.r3.update_leg(directional_angle, strength)
-                #self.l1.update_leg(directional_angle, strength)
-                #self.l2.update_leg(directional_angle, strength)
-                #self.l3.update_leg(directional_angle, strength)
-                sleep_ms(10)
+                self.l1.update_leg(directional_angle, strength)
+                self.l2.update_leg(directional_angle, strength)
+                self.l3.update_leg(directional_angle, strength)
+                delay = linear_interpolate(strength, 0.2, 1, 30, 1)
+                sleep_ms(int(delay))
             else:
                 # new gait request, set legs to tripod gait offset
                 self.current_gait = "tripod"
@@ -82,6 +84,7 @@ class Hexapod:
         
         if gait_name is "wave":
             if gait_name == self.current_gait:
+                
                 # continue wave gait as normal
                 self.r1.update_leg(directional_angle, strength)
                 self.r2.update_leg(directional_angle, strength)
@@ -90,7 +93,8 @@ class Hexapod:
                 self.l2.update_leg(directional_angle, strength)
                 self.l3.update_leg(directional_angle, strength)
                 
-                sleep_ms(10)
+                delay = linear_interpolate(strength, 0.2, 1, 30, 1)
+                sleep_ms(int(delay))
             else:
                 # new gait request, set legs to tripod gait offset
                 self.current_gait = "wave"

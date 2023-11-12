@@ -1,7 +1,6 @@
 from servo import Servo, servo2040, ServoCluster
 from math import atan2, cos, sin, acos, sqrt, degrees, radians, pi, trunc
 from time import sleep_ms, ticks_ms
-from wait import is_timer_expired, reset_timer
 from tween import linear_interpolate
 class Leg:
         
@@ -44,7 +43,7 @@ class Leg:
         Leg.cluster.calibration(self.femur_port, femur_cal)
         Leg.cluster.calibration(self.tibia_port, tibia_cal)
                 
-        self.leg_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
+        #self.leg_timer = {"start_time" : 0, "duration" : 0, "in_progress" : False}
         
         # each leg tracks its progress along its path
         self.cycle_progress:float = 0.0
