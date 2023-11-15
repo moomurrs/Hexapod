@@ -78,6 +78,21 @@ void requestEvent() {
     buttons += 16;
     dpad += 1;
     misc += 1;
-    
-    Serial.printf("rx: %d, ry: %d, lx: %d, ly: %d, buttons: %x, dpad: %x, misc: %x\n", rx, ry, lx, ly, buttons, dpad, misc);
+
+    Serial.print("rx: ");
+    Serial.print(rx);
+    Serial.print("ry: ");
+    Serial.print(ry);
+    Serial.print("lx: ");
+    Serial.print(lx);
+    Serial.print("ly: ");
+    Serial.print(ly);
+    Serial.print("buttons: ");
+    Serial.print(buttons, HEX);
+    Serial.print("dpad: ");
+    Serial.print(dpad, HEX);
+    Serial.print("misc: ");
+    Serial.print(misc, HEX);
+    Serial.println();
+
 }

@@ -1,5 +1,5 @@
 from math import degrees, radians, sin, cos, pi
-from time import ticks_ms, sleep_ms
+from time import ticks_ms, sleep_ms, sleep_us
 from pimoroni import Button
 from servo import Servo, servo2040
 from leg import Leg
@@ -63,8 +63,8 @@ class Hexapod:
                 self.l1.update_leg(directional_angle, strength)
                 self.l2.update_leg(directional_angle, strength)
                 self.l3.update_leg(directional_angle, strength)
-                delay = linear_interpolate(strength, 0.2, 1, 30, 1)
-                sleep_ms(int(delay))
+                delay = linear_interpolate(strength, 0.2, 1, 30000, 200)
+                sleep_us(int(delay))
             else:
                 # new gait request, set legs to tripod gait offset
                 self.current_gait = "tripod"

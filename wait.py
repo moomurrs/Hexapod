@@ -28,8 +28,12 @@ class Timer:
             # timer expired, reset
             self.reset_timer()
             return False
+        
     def reset_timer(self) -> None:
         current_time = ticks_ms()
         self.timer["start_time"] = current_time
         self.timer["in_progress"] = True
-
+    
+    def change_wait_time(self, new_wait_time_ms:int):
+        self.timer["time_to_wait"] = new_wait_time_ms
+        self.reset_timer()

@@ -19,13 +19,20 @@ GamepadPtr myGamepad;
 // Up to 4 gamepads can be connected at the same time.
 void onConnectedGamepad(GamepadPtr gp) {
     if (myGamepad == nullptr) {
-        Serial.printf("CALLBACK: Gamepad is connected\n");
+        Serial.println("CALLBACK: Gamepad is connected\n");
         // Additionally, you can get certain gamepad properties like:
         // Model, VID, PID, BTAddr, flags, etc.
         GamepadProperties properties = gp->getProperties();
-        Serial.printf("Gamepad model: %s, VID=0x%04x, PID=0x%04x\n",
-                      gp->getModelName().c_str(), properties.vendor_id,
-                      properties.product_id);
+        Serial.println("Gamepad model: ");
+        Serial.print(gp->getModel());
+        
+        Serial.print(", VID=");
+        Serial.print(properties.vendor_id, HEX);
+
+        Serial.print(", PID=");
+        Serial.print(properties.product_id, HEX);
+        Serial.println();
+
         myGamepad = gp;
         myGamepad->setColorLED(0, 255, 0);
     }
@@ -35,7 +42,7 @@ void onDisconnectedGamepad(GamepadPtr gp) {
     bool foundGamepad = false;
 
     if (myGamepad == gp) {
-        Serial.printf("CALLBACK: Gamepad is disconnected\n");
+        Serial.println("CALLBACK: Gamepad is disconnected\n");
         myGamepad = nullptr;
         foundGamepad = true;
     }
@@ -46,17 +53,29 @@ void onDisconnectedGamepad(GamepadPtr gp) {
     }
 }
 
+
 // Arduino setup function. Runs in CPU 1
 void setup() {
     Wire.setClock(100000);
     Wire.begin(I2CADDR);
     Wire.onRequest(requestEvent);
 
+    /*
+    pinMode(LEDR, OUTPUT);
+    pinMode(LEDG, OUTPUT);
+    pinMode(LEDB, OUTPUT);
+    */
     Serial.begin(115200);
-    Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
+    Serial.println("Firmware: ");
+    Serial.print(BP32.firmwareVersion());
     const uint8_t *addr = BP32.localBdAddress();
-    Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n", addr[0], addr[1],
-                  addr[2], addr[3], addr[4], addr[5]);
+    Serial.println("BD Addr: ");
+    for (int i = 0; i < 6; i++) {
+        if (i > 0) {
+            Serial.print(":");
+        }
+        Serial.print(addr[i], HEX);
+    }
 
     // Setup the Bluepad32 callbacks
     BP32.setup(&onConnectedGamepad, &onDisconnectedGamepad);
@@ -187,7 +206,26 @@ void requestEvent() {
     // send misc button char
     Wire.write(misc);
 
-    Serial.printf(
-        "rx: %d, ry: %d, lx: %d, ly: %d, buttons: %x, dpad: %x, misc: %x\n", rx,
-        ry, lx, ly, buttons, dpad, misc);
+    Serial.print("rx: ");
+    Serial.print(rx);
+
+    Serial.print("ry: ");
+    Serial.print(ry);
+
+    Serial.print("lx: ");
+    Serial.print(lx);
+
+    Serial.print("ly: ");
+    Serial.print(ly);
+
+    Serial.print("buttons: ");
+    Serial.print(buttons, HEX);
+
+    Serial.print("dpad: ");
+    Serial.print(dpad, HEX);
+
+    Serial.print("misc: ");
+    Serial.print(misc, HEX);
+
+    Serial.println();
 }

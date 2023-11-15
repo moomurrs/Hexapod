@@ -17,7 +17,7 @@ class Leg:
     z_ground:int = 60
     
     # base increment must be divisible by 6 and 12
-    base_increment:float = 1 / 60
+    base_increment:float = 1 / 36
     
     # servo cluster (0-17) addressable as a class variable
     cluster = cluster = ServoCluster(0, 0, list(range(servo2040.SERVO_1, servo2040.SERVO_18 + 1)))

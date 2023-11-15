@@ -15,14 +15,15 @@ class Led:
         # Start updating the LED bar
         self.led_bar.start()
         
-        self.timer:Timer = Timer(100)
+        self.bounce_timer:Timer = Timer(100)
+        self.flash_timer:Timer = Timer(1000)
         
         # used to bounce led
         self.i:int = 0
         self.direction:int = 1
     
     def bounce(self, r:int, g:int, b:int):
-        if self.timer.is_timer_expired():
+        if self.bounce_timer.is_timer_expired():
             # turn off current led
             self.led_bar.set_rgb(self.i, 0, 0, 0)
             # increment to next led
@@ -33,6 +34,19 @@ class Led:
             if self.i == 5:
                 self.direction = -1
             elif self.i == 0:
+                self.direction = 1
+    
+    def flash_all(self, r:int, g:int, b:int):
+        if self.flash_timer.is_timer_expired():
+            if self.direction == 1:
+                # turn on
+                for i in range(6):
+                    self.led_bar.set_rgb(i, r, g, b)
+                self.direction = -1
+            else:
+                # turn off
+                for i in range(6):
+                    self.led_bar.set_rgb(i, 0, 0, 0)
                 self.direction = 1
     
     def turn_off(self):
